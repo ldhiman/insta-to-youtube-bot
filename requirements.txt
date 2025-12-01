@@ -1,0 +1,13 @@
+# Telegram Bot
+python-telegram-bot
+
+# YouTube/Google API
+google-auth-oauthlib
+google-api-python-client
+
+# Environment Variables
+python-dotenv
+
+# Scraper (Requests + BeautifulSoup)
+requests
+beautifulsoup4
