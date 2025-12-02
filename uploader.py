@@ -9,7 +9,7 @@ import os
 import time
 import pickle
 
-SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
+SCOPES = ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.readonly']
 
 
 def get_authenticated_service():
@@ -42,7 +42,7 @@ def get_authenticated_service():
     # (if you ever hit discovery cache issues, add cache_discovery=False)
 
 
-def upload_video(file_path, title, description, max_retries=5):
+def upload_video(file_path, title, description, tags, max_retries=5):
     youtube = get_authenticated_service()
 
     body = {
@@ -50,6 +50,7 @@ def upload_video(file_path, title, description, max_retries=5):
             'title': title[:100],  # YouTube limit
             'description': (description or '') + "\n\n#shorts",
             'categoryId': '24',
+            'tags': tags,
         },
         'status': {
             'privacyStatus': 'private',  # Start private to check for copyright
@@ -76,7 +77,6 @@ def upload_video(file_path, title, description, max_retries=5):
 
     while response is None:
         try:
-            print("DEBUG: calling next_chunk()...")
             status, response = request.next_chunk()
             if status:
                 print(f"Uploaded {int(status.progress() * 100)}%")
