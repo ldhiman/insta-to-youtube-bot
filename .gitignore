@@ -2,4 +2,6 @@ client_secrets.json
 __pycache__/
 .env
 token.pickle
-downloads/
+*.pickle
+.secrets/
+downloads/"token.pickle" 
