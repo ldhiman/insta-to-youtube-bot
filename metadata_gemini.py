@@ -100,8 +100,13 @@ def generate_metadata(caption: str, url, niche: str = "", stats_context: str = "
     """
 
     prompt = f"""
-You are an expert YouTube Shorts SEO optimizer.
-
+    You are a YouTube Shorts viral strategist. See the caption of the video and recent stats and generate high-CTR metadata.
+    Output a JSON object with these exact keys:
+        1. "title": A curiosity-gap title (max 60 chars). NO generic titles like "Funny Cat".
+        2. "description": A detailed description atleast 20 lines. 
+           Line 1: Describe the hook. 
+           Line 2: Ask a specific question to the viewer to encourage comments (e.g. "Have you ever tried this?").
+        3. "tags": A list of 10 high-traffic keywords mixed with 2 niche keywords.
 Here is my channel's recent performance data (titles, views, likes, descriptions).
 Use it to understand what style performs well and keep your output aligned with it,
 but still improve it for virality and retention.
@@ -115,9 +120,6 @@ Generate highly clickable metadata for a YouTube SHORT.
 INPUT CAPTION:
 {caption}
 
-NICHE:
-{niche}
-
 RULES FOR OUTPUT:
 1) TITLE:
    - Less than 65 characters
@@ -130,10 +132,13 @@ RULES FOR OUTPUT:
    - Then add 4–6 related search phrases in bullet points
    - Add a short call to action
    - Add hashtags at bottom
+   - Description must be at least 20 lines long
 
 3) TAGS:
    - Simple keyword list (max 10), no hashtags
-
+   - Mix high-traffic and niche keywords
+   - Max 10 tags
+   
 4) HASHTAGS:
    - Include #shorts and niche tags
    - 5–10 hashtags total

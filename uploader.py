@@ -9,7 +9,7 @@ import os
 import time
 import pickle
 
-SCOPES = ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.readonly']
+SCOPES = ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.readonly', 'https://www.googleapis.com/auth/yt-analytics.readonly']
 
 
 def get_authenticated_service():
@@ -104,8 +104,14 @@ def upload_video(file_path, title, description, tags, max_retries=5):
             time.sleep(sleep_time)
             error = None  # reset and retry loop
 
-    print("Upload complete. Video ID:", response['id'])
-    return response['id']
+    video_id = response["id"]
+
+    # Save schedule info
+    with open("pending_publish.txt", "a") as f:
+        f.write(f"{video_id}\n")
+    print("Upload complete. Video ID:", video_id)
+    
+    return video_id
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from metadata_gemini import generate_metadata, build_stats_context
 import downloader
 import uploader
 from telegram.request import HTTPXRequest
-
+from modifier import make_video_unique
 
 load_dotenv()
 
@@ -23,11 +23,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=chat_id, text="⬇️ Downloading Reel...")
 
     # 2. Download Phase
-    file_path, caption = downloader.download_instagram_reel(user_url)
+    file_path_old, caption = downloader.download_instagram_reel(user_url)
 
-    if not file_path:
+    if not file_path_old:
         await context.bot.send_message(chat_id=chat_id, text="❌ Download failed.")
         return
+    else:
+        await context.bot.send_message(chat_id=chat_id, text="🎬 Modifying video to ensure uniqueness...")
+    file_path = make_video_unique(file_path_old)
+
+    if not file_path:
+        await context.bot.send_message(chat_id=chat_id, text="❌ Video modification failed, using original video for upload.")
+        file_path = file_path_old  # Fallback to original
+
 
     await context.bot.send_message(chat_id=chat_id, text="⬆️ Uploading to YouTube...")
 
