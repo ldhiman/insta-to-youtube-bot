@@ -43,7 +43,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         stats_context = build_stats_context()
         print("Stats Context:", stats_context)
-        metadata = generate_metadata(caption=caption, url=user_url,stats_context=stats_context)
+        metadata = generate_metadata(caption=caption, url=user_url, video_path=file_path, stats_context=stats_context)
         print("Generated Metadata:", metadata)
         video_id = uploader.upload_video(file_path, title=(metadata["title"] or caption), description=(metadata["description"] or f"Original: {user_url}"), tags=metadata.get("tags", []))
         youtube_link = f"https://youtube.com/shorts/{video_id}"

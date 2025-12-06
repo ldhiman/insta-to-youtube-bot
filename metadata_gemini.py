@@ -6,6 +6,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 import re
+import time
 load_dotenv()
 # ---------- CONFIG ----------
 
@@ -90,14 +91,42 @@ def build_stats_context(max_videos=8):
         return ""
 
 
-# ---------- GEMINI METADATA GENERATION ----------
+# ---------- GEMINI FILE HANDLING ----------
+def upload_video_to_gemini(video_path):
+    """Uploads a video file and waits for processing to complete."""
+    if not video_path or not os.path.exists(video_path):
+        print(f"Video path not found: {video_path}")
+        return None
 
-def generate_metadata(caption: str, url, niche: str = "", stats_context: str = ""):
+    print(f"Uploading {video_path} to Gemini...")
+    video_file = genai.upload_file(path=video_path)
+    
+    print(f"Completed upload: {video_file.uri}")
+
+    # Check state and wait for processing
+    while video_file.state.name == "PROCESSING":
+        print('.', end='', flush=True)
+        time.sleep(2)
+        video_file = genai.get_file(video_file.name)
+
+    print() # Newline after dots
+
+    if video_file.state.name == "FAILED":
+        raise ValueError(f"Video processing failed: {video_file.state.name}")
+        
+    print(f"Video is active and ready for analysis.")
+    return video_file
+
+# ---------- GEMINI METADATA GENERATION ----------
+def generate_metadata(caption: str, url, video_path: str, stats_context: str = ""):
     """
     Generates viral-optimized YouTube Shorts metadata using Gemini.
     Uses YouTube stats context (if provided) to adapt style.
     Returns dict: title, description, tags, hashtags.
     """
+
+    video_file = upload_video_to_gemini(video_path)
+
 
     prompt = f"""
     You are a YouTube Shorts viral strategist. See the caption of the video and recent stats and generate high-CTR metadata.
@@ -151,8 +180,14 @@ Return ONLY valid JSON:
   "hashtags": ["..."]
 }}
 """
+    content_payload = [prompt]
 
-    response = genai.GenerativeModel(GEMINI_MODEL).generate_content(prompt)
+    if video_file:
+        print("Attaching video file to Gemini prompt for analysis...")
+        content_payload.append(video_file)
+
+
+    response = genai.GenerativeModel(GEMINI_MODEL).generate_content(contents=content_payload)
     raw = (response.text or "").strip()
 
      # 1) Try direct JSON first
@@ -193,9 +228,9 @@ if __name__ == "__main__":
     stats_context = build_stats_context()
     print("Stats Context:", stats_context)
     metadata = generate_metadata(
-        caption="This is an amazing short video about cats!",
-        url="https://instagram.com/reel/xyz",
-        niche="Cats",
+        caption="@minelampstore #minecraft",
+        url="https://www.instagram.com/reel/DN_IuaHDUXB/?igsh=MTkxaDA0eWlwem1iZQ==",
+        video_path=r"D:\Projects\insta-to-youtube-bot\downloads\processed_d14f84d7-84a4-4a42-899b-ca9fe6c9e50b.mp4",
         stats_context=stats_context
     )
     print("Generated Metadata:", metadata)
