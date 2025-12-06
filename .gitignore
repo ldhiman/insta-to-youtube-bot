@@ -6,3 +6,4 @@ token.pickle
 .secrets/
 downloads/
 "token.pickle" 
+pending_publish.txt
